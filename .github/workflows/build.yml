@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout your repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Cache Buildozer global directory for faster builds
       - name: Cache Buildozer global directory
         uses: actions/cache@v4
         with:
@@ -21,6 +23,7 @@ jobs:
           restore-keys: |
             buildozer-global-
 
+      # 3️⃣ Cache Buildozer build directory (.buildozer)
       - name: Cache Buildozer build directory
         uses: actions/cache@v4
         with:
@@ -29,15 +32,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-
 
-      - name: Build APK with Buildozer (Docker)
+      # 4️⃣ Build APK using Docker (non-root)
+      - name: Build APK with Buildozer (Docker, non-root)
         run: |
           docker run --rm \
-            -e BUILDOZER_ALLOW_ROOT=1 \
             -v ${{ github.workspace }}:/home/user/app \
             -w /home/user/app \
+            -e HOME=/home/user \
+            -u $(id -u):$(id -g) \
             kivy/buildozer:latest \
-            bash -c "export BUILDOZER_ALLOW_ROOT=1 && buildozer android debug"
+            buildozer android debug
 
+      # 5️⃣ Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
