@@ -13,10 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get current date
-        id: get-date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
       - name: Cache Buildozer global directory
         uses: actions/cache@v4
         with:
@@ -29,13 +25,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .buildozer
-          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+          key: ${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
             ${{ runner.os }}-
 
       - name: Build APK with Buildozer (Docker)
         run: |
           docker run --rm \
+            -e BUILDOZER_ALLOW_ROOT=1 \
             -v ${{ github.workspace }}:/home/user/app \
             -w /home/user/app \
             kivy/buildozer:latest \
