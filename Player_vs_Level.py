@@ -14,6 +14,7 @@ from kivy.uix.label import Label
 from kivy.graphics import Rectangle, Color, InstructionGroup, Ellipse, Triangle, Line
 from kivy.properties import StringProperty, NumericProperty
 from kivy.animation import Animation
+from kivy.uix.image import Image
 from kivy.core.audio import SoundLoader
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
@@ -21,6 +22,12 @@ from kivy.clock import Clock
 from plyer import orientation
 import random
 import os
+
+try:
+    import android
+    android.permissions.request_permission([android.permissions.READ_INTERNAL_STORAGE])
+except (ImportError, AttributeError):
+    print("File not Found")
 
 levels = [
 # Levels 1-50
@@ -227,20 +234,27 @@ class Mechanics(Widget):
         self.game_over_flag = False
         self.jumpscare_triggered = False
         self.free_jump = False
+        self.bg = None
 
         #Plyer things
         orientation.set_landscape()
         
         #os things
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        BASE_DIR = "/storage/emulated/0/Player_VS_Level"
         
-        #Sound Path
-        JUMPSCARE_SOUND_PATH = os.path.join(BASE_DIR, "Download", "fnaf_jumpscare.mp3")
-        JUMPING_SOUND_PATH = os.path.join(BASE_DIR, "Download", "jumping.wav")
+        #Sound and Image Path
+        BACKGROUND_IMG_PATH = os.path.join(BASE_DIR, "cloud.png")
+        JUMPSCARE_SOUND_PATH = os.path.join(BASE_DIR, "fnaf_jumpscare.mp3")
+        JUMPING_SOUND_PATH = os.path.join(BASE_DIR, "jumping.wav")
         
         #Sound😈
         self.jumpscare_sound = SoundLoader.load(JUMPSCARE_SOUND_PATH)
         self.jump_sound = SoundLoader.load(JUMPING_SOUND_PATH)
+        
+        #Image
+        if os.path.exists(BACKGROUND_IMG_PATH):
+            self.bg = Image(source=BACKGROUND_IMG_PATH, size_hint=(None, None), size=(3000, 2000))
+            self.add_widget(self.bg)
 
         # UI buttons
         self.btn = Button(text="Forward", font_size=40, pos=(300, 40), size=(200, 100), size_hint=(None, None))
@@ -279,7 +293,6 @@ class Mechanics(Widget):
         # Dev mode buttons
         self.dev_button = Button(text="Dev Mode", size_hint=(None, None), size=(200, 100), pos=(50, 600))
         self.dev_button.bind(on_press=self.toggle_dev_mode)
-        self.add_widget(self.dev_button)
 
         self.speed_inc_btn = Button(text="+Speed", size_hint=(None, None), size=(250, 80), pos=(Window.width-380, 150))
         self.speed_inc_btn.bind(on_press=lambda x: self.change_speed(1))
@@ -828,6 +841,10 @@ class Mechanics(Widget):
         
         Window.clearcolor = (0, 0, 0, 1)
         
+        if self.bg and self.bg.parent:
+            self.remove_widget(self.bg)
+            self.bg = None
+        
         Clock.unschedule(self.update)
         
         if hasattr(self, "game_over_label"):
@@ -904,6 +921,10 @@ class Mechanics(Widget):
             b.disabled = True
             
         Window.clearcolor = (1, 0, 0, 1)
+        
+        if self.bg and self.bg.parent:
+            self.remove_widget(self.bg)
+            self.bg = None
         
         self.bad_label = Label(text="THE LEVEL HAS TAKEN YOU", font_size=90, center=(Window.width/2, Window.height/2), color=(0, 0, 0, 1))
         self.add_widget(self.bad_label)
