@@ -11,36 +11,37 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get current date
         id: get-date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT # Corrected date command and output format
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Cache Buildozer global directory
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
-          path: buildozer_global # The actual path Buildozer uses for global storage
+          path: buildozer_global
           key: buildozer-global-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-global-
 
       - name: Cache Buildozer environment/dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
-          path: buildozer # The actual path where the environment is created (adjust if necessary)
-          # Key incorporates OS, date, and a hash of the spec file
+          path: buildozer
           key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            ${{ runner.os }}-
 
       - name: Build with Buildozer
-        # Uses the ArtemSBulgakov/buildozer-action
-        uses: ArtemSBulgakov/buildozer-action@v1 # Use the latest stable version (check GitHub Marketplace)
+        uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
           command: buildozer android debug
           buildozer_version: master
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: package
-          # Corrected syntax to reference the action's output
           path: ${{ steps.buildozer.outputs.filename }}
