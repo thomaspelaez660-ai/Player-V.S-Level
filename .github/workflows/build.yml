@@ -10,21 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ANDROID_HOME: ${{ runner.temp }}/android-sdk
-      PATH: ${{ runner.temp }}/android-sdk/cmdline-tools/latest/bin:${{ runner.temp }}/android-sdk/platform-tools:${{ runner.temp }}/android-sdk/emulator:${{ runner.temp }}/android-sdk/tools/bin:${PATH}}
+      ANDROID_HOME: $HOME/android-sdk
+      PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/emulator:$PATH
 
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      # 3️⃣ Install Buildozer & dependencies
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -37,7 +34,6 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
 
-      # 4️⃣ Install Android SDK command-line tools
       - name: Install Android SDK
         run: |
           mkdir -p $ANDROID_HOME/cmdline-tools
@@ -49,12 +45,10 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
-      # 5️⃣ Build APK
       - name: Build APK
         run: |
           buildozer android debug
 
-      # 6️⃣ Upload APK
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
