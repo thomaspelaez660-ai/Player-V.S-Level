@@ -36,32 +36,6 @@ jobs:
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 5️⃣ Install Android SDK
-      - name: Install Android SDK
-        run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
-
-          if [ ! -d latest ]; then
-            wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O tools.zip
-            unzip tools.zip
-            mv cmdline-tools latest
-            rm tools.zip
-          fi
-
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
-            "platform-tools" \
-            "platforms;android-31" \
-            "build-tools;31.0.0"
-        env:
-          PATH: /usr/bin:/bin:$PATH
-
-      # 6️⃣ Add Android SDK to PATH (CORRECT FORMAT)
-      - name: Add Android SDK to PATH
-        run: |
-          echo "PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/31.0.0:$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
-
       # 7️⃣ Build APK
       - name: Build APK
         run: buildozer android debug
