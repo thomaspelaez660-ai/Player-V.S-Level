@@ -9,58 +9,49 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_HOME: $HOME/.buildozer/android/platform/android-sdk
+
     steps:
       # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Get current date for cache keys
-      - name: Get current date
-        id: get-date
-        run: echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
-
-      # 3️⃣ Cache Buildozer global directory
+      # 2️⃣ Cache Buildozer global directory
       - name: Cache Buildozer global directory
         uses: actions/cache@v4
         with:
           path: .buildozer_global
           key: buildozer-global-${{ hashFiles('buildozer.spec') }}
 
-      # 4️⃣ Cache Buildozer build directory
+      # 3️⃣ Cache Buildozer build directory
       - name: Cache Buildozer build directory
         uses: actions/cache@v4
         with:
           path: .buildozer
-          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-build-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      # 5️⃣ Install system dependencies & Buildozer
-      - name: Install dependencies & Buildozer
+      # 4️⃣ Install system dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            python3-pip python3-setuptools python3-wheel git zip unzip openjdk-11-jdk \
-            libncurses6 libncurses5-dev libffi-dev libssl-dev wget
-          pip install --upgrade pip
-          pip install --user cython==0.29.36 buildozer
-          # Add local pip binaries to PATH for all following steps
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          sudo apt-get install -y python3-pip python3-setuptools python3-wheel \
+                                  git zip unzip openjdk-11-jdk wget \
+                                  libncurses6 libncurses5-dev libffi-dev libssl-dev
 
-      # 6️⃣ Accept Android SDK licenses (non-interactive)
-      - name: Accept Android SDK licenses
+      # 5️⃣ Install Buildozer
+      - name: Install Buildozer
         run: |
-          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-        env:
-          ANDROID_HOME: $HOME/.buildozer/android/platform/android-sdk
-          PATH: $HOME/.local/bin:$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:$PATH
+          pip install --upgrade pip
+          pip install --upgrade cython==0.29.36 buildozer
 
-      # 7️⃣ Build APK with Buildozer
+      # 6️⃣ Build APK (Buildozer auto-downloads Android SDK)
       - name: Build APK
         run: buildozer android debug
         env:
-          ANDROID_HOME: $HOME/.buildozer/android/platform/android-sdk
-          PATH: $HOME/.local/bin:$HOME/.buildozer/android/platform/android-sdk/platform-tools:$PATH
+          PATH: $HOME/.buildozer/android/platform/android-sdk/platform-tools:$PATH
 
-      # 8️⃣ Upload APK artifact
+      # 7️⃣ Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
