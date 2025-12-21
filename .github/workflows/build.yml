@@ -13,11 +13,11 @@ jobs:
       ANDROID_HOME: $HOME/android-sdk
 
     steps:
-      # 1️⃣ Checkout the repo
+      # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Get current date for caching
+      # 2️⃣ Get date for cache key
       - name: Get current date
         id: get-date
         run: echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
@@ -46,25 +46,25 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
 
-      # 6️⃣ Install Android SDK
+      # 6️⃣ Install Android SDK (PATH only set locally)
       - name: Install Android SDK
-        env:
-          PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/emulator:$PATH
         run: |
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          cd $ANDROID_HOME/cmdline-tools
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O cmdline-tools.zip
           unzip cmdline-tools.zip
           rm cmdline-tools.zip
           mv cmdline-tools latest
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+        env:
+          PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/emulator:$PATH
 
       # 7️⃣ Build APK with Buildozer
       - name: Build APK
+        run: buildozer android debug
         env:
           PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/emulator:$PATH
-        run: buildozer android debug
 
       # 8️⃣ Upload APK artifact
       - name: Upload APK artifact
