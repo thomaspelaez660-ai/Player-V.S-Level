@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use ubuntu-latest to have core system utilities
+    runs-on: ubuntu-latest  # full Ubuntu runner with core utilities
 
     env:
       ANDROID_HOME: $HOME/android-sdk
@@ -31,7 +31,7 @@ jobs:
           path: .buildozer
           key: buildozer-build-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      # 4️⃣ Install core utilities and system dependencies
+      # 4️⃣ Install system dependencies (Git, Python3, coreutils, etc.)
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -50,7 +50,7 @@ jobs:
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 7️⃣ Install Android SDK cmdline-tools, build-tools and platform
+      # 7️⃣ Install Android SDK cmdline-tools, build-tools, and platform
       - name: Install Android SDK build-tools and platforms
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
