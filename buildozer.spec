@@ -7,7 +7,7 @@ title = Player VS Level
 package.name = playervslevel
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.example
+package.domain = com.thomas.player_vs_level.app
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -37,7 +37,7 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,kivymd,pillow,zlib
+requirements = python3,kivy,kivymd,pillow,zlib,random,os
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -305,7 +305,7 @@ android.allow_backup = True
 # android.release_artifact = aab
 
 # (str) The format used to package the app for debug mode (apk or aar).
-# android.debug_artifact = apk
+android.debug_artifact = apk
 
 #
 # Python for android (p4a) specific

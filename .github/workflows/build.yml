@@ -1,42 +1,41 @@
-name: Build APK
-
+name: CI
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
       - uses: actions/checkout@v4
 
-      # 2️⃣ Install system dependencies
-      - name: Install dependencies
+      - name: Get Date
+        id: get-date
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            git python3 python3-pip openjdk-11-jdk unzip zip tar wget
+          echo "date=$(date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
 
-      # 3️⃣ Install Buildozer and Cython
-      - name: Install Buildozer
-        run: |
-          pip install --upgrade pip
-          pip install --upgrade cython==0.29.36 buildozer
-
-      # 4️⃣ Add pip binaries to PATH
-      - name: Add pip binaries to PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      # 5️⃣ Build the APK
-      - name: Build APK
-        run: buildozer android debug
-
-      # 6️⃣ Upload APK artifact
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Cache Buildozer global directory
+        uses: actions/cache@v3
         with:
-          name: apk
-          path: bin/*.apk
+          path: .buildozer_global
+          key: buildozer-global-${{ hashFiles('buildozer.spec') }}
+
+      - name: Cache Buildozer project
+        uses: actions/cache@v3
+        with:
+          path: .buildozer
+          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: master
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: ${{ steps.buildozer.outputs.filename }}
