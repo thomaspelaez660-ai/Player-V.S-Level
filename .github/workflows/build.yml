@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Install core Linux utilities + system dependencies
+      # 2️⃣ Install system dependencies (coreutils, git, Python3, etc.)
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -40,19 +40,31 @@ jobs:
       - name: Create buildozer directory
         run: mkdir -p $HOME/.buildozer
 
-      # 6️⃣ Install Android SDK cmdline-tools, build-tools, and platform
+      # 6️⃣ Fixed Android SDK installation step
       - name: Install Android SDK
         run: |
+          # Ensure core utilities exist
+          sudo apt-get update
+          sudo apt-get install -y coreutils wget unzip zip openjdk-11-jdk
+
+          # Create cmdline-tools folder
           mkdir -p $HOME/android-sdk/cmdline-tools
           cd $HOME/android-sdk/cmdline-tools
+
+          # Download and extract command line tools if not already present
           if [ ! -d latest ]; then
             wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O cmdline-tools.zip
             unzip cmdline-tools.zip
             rm cmdline-tools.zip
             mv cmdline-tools latest
           fi
+
+          # Accept all SDK licenses
           yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+
+          # Install required platform-tools, build-tools, and platforms
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+            "platform-tools" "platforms;android-31" "build-tools;31.0.0"
         env:
           PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$PATH
 
