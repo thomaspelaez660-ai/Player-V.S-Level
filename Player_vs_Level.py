@@ -159,7 +159,9 @@ class GameMenu(Screen):
         mechanics = game_screen.children[0]
         
         print(f"Difficulty Set To: {level}")
-        if level == "Easy":
+        if level == "Noob":
+            mechanics.current_enemy_speed = 0
+        elif level == "Easy":
             mechanics.current_enemy_speed = 3
         elif level == "Normal":
             mechanics.current_enemy_speed = 4
@@ -271,7 +273,7 @@ class Mechanics(Widget):
         self.jump.bind(on_press=self.jumping)
         self.add_widget(self.jump)
 
-        self.pause = Button(text="| |", font_size=40, pos=(1300, 556), size=(100, 100), size_hint=(None, None))
+        self.pause = Button(text="l l", font_size=40, pos=(1300, 556), size=(100, 100), size_hint=(None, None))
         self.pause.bind(on_press=self.show_popup)
         self.add_widget(self.pause)
 
