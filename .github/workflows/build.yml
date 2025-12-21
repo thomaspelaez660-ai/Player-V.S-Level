@@ -10,30 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout your repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # 1️⃣ Checkout your repo
+      - uses: actions/checkout@v4
 
       # 2️⃣ Install system dependencies
-      - name: Install dependencies
+      - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            git python3 python3-pip openjdk-11-jdk \
-            unzip zip tar wget
+          sudo apt-get install -y git python3 python3-pip openjdk-11-jdk \
+            unzip zip tar wget libncurses6 libncurses5-dev libffi-dev libssl-dev
 
       # 3️⃣ Install Buildozer and Cython
       - name: Install Buildozer
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install --upgrade cython==0.29.36 buildozer
+          pip install --upgrade pip
+          pip install --upgrade cython==0.29.36 buildozer
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 4️⃣ Add pip binaries to PATH
-      - name: Add pip binaries to PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      # 5️⃣ Install Android SDK manually (so aidl/build-tools exist)
-      - name: Install Android SDK & build-tools
+      # 4️⃣ Set up Android SDK & Build Tools
+      - name: Setup Android SDK
         run: |
           export ANDROID_HOME=$HOME/android-sdk
           mkdir -p $ANDROID_HOME/cmdline-tools
@@ -44,18 +39,21 @@ jobs:
             rm cmdline-tools.zip
             mv cmdline-tools latest
           fi
-          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/build-tools/31.0.0:$PATH
+
           yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
           sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;31.0.0"
+          chmod +x $ANDROID_HOME/build-tools/31.0.0/aidl
 
-      # 6️⃣ Build the APK
+      # 5️⃣ Build the APK
       - name: Build APK
         run: |
           export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$HOME/.local/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/build-tools/31.0.0:$PATH
           buildozer android debug
 
-      # 7️⃣ Upload the generated APK
+      # 6️⃣ Upload the APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
