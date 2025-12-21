@@ -6,35 +6,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  android:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       # 1️⃣ Checkout repository
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       # 2️⃣ Install system dependencies
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             git python3 python3-pip openjdk-11-jdk unzip zip tar wget
 
-      # 3️⃣ Install Buildozer & Cython
+      # 3️⃣ Install Buildozer and Cython
       - name: Install Buildozer
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install --upgrade cython buildozer
+          pip install --upgrade pip
+          pip install --upgrade cython==0.29.36 buildozer
 
       # 4️⃣ Add pip binaries to PATH
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 5️⃣ Run Buildozer (auto downloads SDK/NDK/build-tools)
+      # 5️⃣ Build the APK
       - name: Build APK
-        run: |
-          buildozer android debug
+        run: buildozer android debug
 
       # 6️⃣ Upload APK artifact
       - name: Upload APK
