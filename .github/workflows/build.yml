@@ -17,12 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2️⃣ Install system dependencies
-      - name: Install system dependencies
+      # 2️⃣ Install core Linux utilities + system dependencies
+      - name: Install core dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            coreutils git wget unzip zip openjdk-11-jdk \
+          sudo apt-get install -y coreutils git wget unzip zip openjdk-11-jdk \
             python3 python3-pip python3-setuptools python3-wheel \
             libncurses6 libncurses5-dev libffi-dev libssl-dev
 
@@ -36,7 +35,7 @@ jobs:
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 5️⃣ Install Android SDK cmdline-tools, build-tools, platforms
+      # 5️⃣ Install Android SDK (cmdline-tools, platform-tools, build-tools, platforms)
       - name: Install Android SDK
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
