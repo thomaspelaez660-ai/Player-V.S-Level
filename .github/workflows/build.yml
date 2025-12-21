@@ -21,16 +21,9 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
-          
+
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Verify tools
-        run: |
-          git --version
-          python3 --version
-          pip --version
-          buildozer --version
 
       - name: Build APK
         run: buildozer android debug
