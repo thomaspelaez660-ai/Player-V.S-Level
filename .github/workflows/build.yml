@@ -13,11 +13,11 @@ jobs:
       ANDROID_HOME: $HOME/android-sdk
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Get date for cache keys
+      # 2️⃣ Get current date for cache keys
       - name: Get current date
         id: get-date
         run: echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
