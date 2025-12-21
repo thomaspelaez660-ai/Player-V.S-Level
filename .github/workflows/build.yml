@@ -10,37 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repository
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Install system dependencies for Buildozer & Python/Android
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            python3 python3-pip git openjdk-11-jdk unzip zip tar wget \
-            libncurses5 libncurses6 libffi-dev libssl-dev
+          sudo apt-get install -y git python3 python3-pip openjdk-11-jdk unzip zip tar wget
 
-      # 3️⃣ Install Buildozer & Cython
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
 
-      # 4️⃣ Add pip binaries to PATH
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 5️⃣ Build APK using Buildozer (SDK & Build-Tools auto-installed)
       - name: Build APK
-        run: |
-          buildozer android debug
-        env:
-          ANDROID_HOME: $HOME/.buildozer/android/platform/android-sdk
-          PATH: $HOME/.local/bin:$PATH
+        run: buildozer android debug
 
-      # 6️⃣ Upload APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
