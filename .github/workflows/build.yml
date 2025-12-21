@@ -11,14 +11,13 @@ jobs:
 
     env:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
-      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
 
     steps:
-      # 1️⃣ Checkout the repository
+      # 1️⃣ Checkout repository
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2️⃣ Install core Linux utilities + dependencies
+      # 2️⃣ Install system dependencies
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -52,10 +51,9 @@ jobs:
           $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
             "platform-tools" "platforms;android-31" "build-tools;31.0.0"
         env:
-          ANDROID_HOME: $HOME/android-sdk
           PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$PATH
 
-      # 6️⃣ Add Android SDK to PATH
+      # 6️⃣ Add Android SDK to PATH for following steps
       - name: Add Android SDK to PATH
         run: |
           echo "$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/31.0.0:$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
