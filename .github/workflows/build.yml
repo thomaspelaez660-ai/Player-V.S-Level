@@ -14,39 +14,63 @@ jobs:
       PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:$PATH
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Install core system dependencies
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git python3 python3-pip python3-setuptools python3-wheel zip unzip openjdk-11-jdk wget
-          
+          sudo apt-get install -y \
+            coreutils tar unzip zip wget git python3 python3-pip openjdk-11-jdk \
+            libncurses6 libncurses5-dev libffi-dev libssl-dev
+
+      # 3️⃣ Install Buildozer
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
 
+      # 4️⃣ Add pip binaries to PATH
+      - name: Add pip binaries to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      # 5️⃣ Install Android SDK cmdline-tools, build-tools, and platform
       - name: Install Android SDK
         run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          cd $ANDROID_HOME/cmdline-tools
           if [ ! -d latest ]; then
             wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O cmdline-tools.zip
             unzip cmdline-tools.zip
             rm cmdline-tools.zip
             mv cmdline-tools latest
           fi
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME \
+            "platform-tools" "platforms;android-33" "build-tools;33.0.0"
 
+      # 6️⃣ Optional sanity check
+      - name: Verify tools
+        run: |
+          which git
+          git --version
+          which python3
+          python3 --version
+          which buildozer
+          buildozer --version
+          $ANDROID_HOME/build-tools/33.0.0/aidl --version || echo "Aidl ready"
+
+      # 7️⃣ Build APK
       - name: Build APK
         run: buildozer android debug
         env:
           PATH: $HOME/.local/bin:$PATH
-          ANDROID_HOME: $HOME/android-sdk
+          ANDROID_HOME: $ANDROID_HOME
 
-      - name: Upload APK
+      # 8️⃣ Upload APK artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: apk
