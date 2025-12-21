@@ -10,12 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2️⃣ Install system dependencies (Python, Java, unzip, tar, git)
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -23,31 +21,27 @@ jobs:
             openjdk-11-jdk git wget unzip tar zip zlib1g-dev libncurses6 \
             libffi-dev libssl-dev
 
-      # 3️⃣ Install Buildozer
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 4️⃣ Cache Buildozer global directory
-      - name: Cache Buildozer global directory
+      - name: Cache Buildozer
         uses: actions/cache@v3
         with:
           path: ~/.buildozer
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-${{ hashFiles('buildozer.spec') }}
 
-      # 5️⃣ Build APK
       - name: Build APK
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: master
+        run: |
+          buildozer android debug
+        env:
+          ANDROIDSDK: $HOME/android-sdk
+          PATH: $HOME/.local/bin:$PATH
 
-      # 6️⃣ Upload APK artifact
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: apk
-          path: ${{ steps.buildozer.outputs.filename }}
+          path: bin/*.apk
