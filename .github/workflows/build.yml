@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # full Ubuntu runner with core utilities
+    runs-on: ubuntu-latest  # full Ubuntu runner ensures core utilities exist
 
     env:
       ANDROID_HOME: $HOME/android-sdk
@@ -31,7 +31,7 @@ jobs:
           path: .buildozer
           key: buildozer-build-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      # 4️⃣ Install system dependencies (Git, Python3, coreutils, etc.)
+      # 4️⃣ Install system dependencies (coreutils, Git, Python, JDK, etc.)
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -50,7 +50,11 @@ jobs:
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 7️⃣ Install Android SDK cmdline-tools, build-tools, and platform
+      # 7️⃣ Ensure .buildozer folder exists
+      - name: Create Buildozer directory
+        run: mkdir -p $HOME/.buildozer
+
+      # 8️⃣ Install Android SDK cmdline-tools, build-tools, and platform
       - name: Install Android SDK build-tools and platforms
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
@@ -66,7 +70,12 @@ jobs:
         env:
           PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$PATH
 
-      # 8️⃣ Optional sanity check
+      # 9️⃣ Add Android SDK tools to PATH
+      - name: Add Android SDK to PATH
+        run: |
+          echo "$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/31.0.0:$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
+
+      # 🔟 Optional sanity check
       - name: Verify tools
         run: |
           which git
@@ -77,14 +86,14 @@ jobs:
           buildozer --version
           $HOME/android-sdk/build-tools/31.0.0/aidl --version || echo "Aidl ready"
 
-      # 9️⃣ Build APK
+      # 1️⃣1️⃣ Build APK
       - name: Build APK
         run: buildozer android debug
         env:
-          PATH: $HOME/.local/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/build-tools/31.0.0:$PATH
+          PATH: $HOME/.local/bin:$PATH
           ANDROID_HOME: $HOME/android-sdk
 
-      # 🔟 Upload APK artifact
+      # 1️⃣2️⃣ Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
