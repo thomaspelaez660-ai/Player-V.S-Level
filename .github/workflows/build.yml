@@ -2,8 +2,8 @@ name: Android CI Build
 
 on:
   push:
-    branches: [ main ]         # runs when code is pushed to main
-  workflow_dispatch:           # allows manual run from GitHub UI
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,11 +13,11 @@ jobs:
       ANDROID_HOME: $HOME/android-sdk
 
     steps:
-      # 1️⃣ Checkout code
+      # 1️⃣ Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Get date for cache key
+      # 2️⃣ Get current date for caching
       - name: Get current date
         id: get-date
         run: echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
@@ -40,7 +40,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools python3-wheel git zip unzip openjdk-11-jdk libncurses5 libncurses5-dev libffi-dev libssl-dev wget
+          sudo apt-get install -y \
+            python3-pip python3-setuptools python3-wheel git zip unzip openjdk-11-jdk \
+            libncurses6 libncurses5-dev libffi-dev libssl-dev wget
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
 
@@ -58,7 +60,7 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
-      # 7️⃣ Build APK
+      # 7️⃣ Build APK with Buildozer
       - name: Build APK
         env:
           PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/emulator:$PATH
