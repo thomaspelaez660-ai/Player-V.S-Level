@@ -31,13 +31,15 @@ jobs:
           path: .buildozer
           key: buildozer-build-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      # 4️⃣ Install system dependencies
+      # 4️⃣ Install system dependencies (including Git!)
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools python3-wheel \
-                                  git zip unzip openjdk-11-jdk wget \
-                                  libncurses6 libncurses5-dev libffi-dev libssl-dev
+          sudo apt-get install -y \
+            git \
+            python3-pip python3-setuptools python3-wheel \
+            zip unzip openjdk-11-jdk wget \
+            libncurses6 libncurses5-dev libffi-dev libssl-dev
 
       # 5️⃣ Install Buildozer
       - name: Install Buildozer
@@ -45,17 +47,24 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
 
-      # 6️⃣ Add pip binaries to PATH (fixes buildozer not found)
+      # 6️⃣ Add pip binaries to PATH (fixes "buildozer: command not found")
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 7️⃣ Build APK (Buildozer auto-downloads Android SDK)
+      # 7️⃣ Optional: sanity check
+      - name: Verify tools
+        run: |
+          git --version
+          python3 --version
+          buildozer --version
+
+      # 8️⃣ Build APK (Buildozer auto-downloads Android SDK)
       - name: Build APK
         run: buildozer android debug
         env:
           PATH: $HOME/.local/bin:$PATH
 
-      # 8️⃣ Upload APK artifact
+      # 9️⃣ Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
