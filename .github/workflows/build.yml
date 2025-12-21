@@ -47,7 +47,7 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade cython==0.29.36 buildozer
 
-      # 6️⃣ Add pip binaries to PATH (fix buildozer command not found)
+      # 6️⃣ Add pip binaries to PATH
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
@@ -61,14 +61,19 @@ jobs:
           which buildozer
           buildozer --version
 
-      # 8️⃣ Build APK (Buildozer auto-downloads Android SDK)
+      # 8️⃣ Add Android build-tools to PATH (fix Aidl not found)
+      - name: Add Android build-tools to PATH
+        run: |
+          echo "$HOME/.buildozer/android/platform/android-sdk/build-tools/31.0.0" >> $GITHUB_PATH
+
+      # 9️⃣ Build APK
       - name: Build APK
         run: buildozer android debug
         env:
-          PATH: $HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
+          PATH: $HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$HOME/.buildozer/android/platform/android-sdk/build-tools/31.0.0:$PATH
           ANDROID_HOME: $HOME/.buildozer/android/platform/android-sdk
 
-      # 9️⃣ Upload APK artifact
+      # 🔟 Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:

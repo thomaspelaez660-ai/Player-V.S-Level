@@ -47,7 +47,7 @@ requirements = python3,kivy,kivymd,pillow,zlib
 presplash.filename = %(source.dir)s/assets/cloud.png
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/assets/icon.png
+icon.filename = %(source.dir)s/assets/logo.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
@@ -107,6 +107,7 @@ android.api = 33
 android.minapi = 21
 
 # (int) Android SDK version to use
+android.build_tools = 31.0.0
 android.sdk = 33
 
 # (str) Android NDK version to use
