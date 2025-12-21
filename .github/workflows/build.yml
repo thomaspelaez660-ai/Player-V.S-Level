@@ -1,4 +1,4 @@
-name: Build APK
+name: Android CI Build
 
 on:
   push:
@@ -14,31 +14,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Install system dependencies required by Buildozer and SDK
-      - name: Install dependencies
+      # 2️⃣ Install system dependencies
+      - name: Install system dependencies
         run: |
-          sudo apt update
-          sudo apt install -y git zip unzip wget curl openjdk-11-jdk \
-            python3 python3-pip libncurses6 libncurses-dev \
-            libffi-dev libssl-dev
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-pip python3-setuptools python3-wheel \
+            git wget unzip zip openjdk-11-jdk
 
-      # 3️⃣ Install Buildozer and Cython
+      # 3️⃣ Install Buildozer
       - name: Install Buildozer
         run: |
-          pip3 install --upgrade pip
-          pip3 install cython==0.29.36 buildozer
+          pip install --upgrade pip
+          pip install --upgrade cython==0.29.36 buildozer
 
-      # 4️⃣ Optional: Check Buildozer version
-      - name: Check Buildozer
+      # 4️⃣ Add pip binaries to PATH
+      - name: Add pip binaries to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      # 5️⃣ Optional: sanity check
+      - name: Verify tools
         run: |
+          which git
+          git --version
+          which python3
+          python3 --version
+          which buildozer
           buildozer --version
 
-      # 5️⃣ Build the APK (Buildozer automatically installs Android SDK and build-tools)
+      # 6️⃣ Build the APK (Buildozer downloads SDK automatically)
       - name: Build APK
-        run: |
-          buildozer android debug
+        run: buildozer android debug
 
-      # 6️⃣ Upload APK artifact
+      # 7️⃣ Upload APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
