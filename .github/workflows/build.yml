@@ -1,27 +1,45 @@
-- name: Install Android SDK
-  run: |
-    # 1️⃣ Make sure core utilities exist
-    sudo apt-get update
-    sudo apt-get install -y coreutils wget unzip zip openjdk-11-jdk
+name: Build APK
 
-    # 2️⃣ Create cmdline-tools folder
-    mkdir -p $HOME/android-sdk/cmdline-tools
-    cd $HOME/android-sdk/cmdline-tools
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-    # 3️⃣ Download and extract command line tools if not already present
-    if [ ! -d latest ]; then
-      wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O cmdline-tools.zip
-      unzip cmdline-tools.zip
-      rm cmdline-tools.zip
-      mv cmdline-tools latest
-    fi
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    # 4️⃣ Accept all SDK licenses
-    yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # 5️⃣ Install required platform-tools, build-tools, and platforms
-    $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
-      "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
 
-  env:
-    PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$PATH
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3.10-venv python3.10-distutils \
+          openjdk-17-jdk git zip unzip curl wget build-essential \
+          autoconf libtool pkg-config zlib1g-dev libssl-dev \
+          libffi-dev libsqlite3-dev
+
+      - name: Create virtual environment
+        run: |
+          python3.10 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip setuptools wheel cython buildozer
+
+      - name: Build APK
+        run: |
+          source venv/bin/activate
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: apk
+          path: bin/*.apk

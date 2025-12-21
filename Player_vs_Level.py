@@ -242,7 +242,7 @@ class Mechanics(Widget):
         orientation.set_landscape()
         
         #os things
-        BASE_DIR = "/storage/emulated/0/Player_VS_Level"
+        BASE_DIR = os.path.join(os.path.dirname(__file__))
         
         #Sound and Image Path
         BACKGROUND_IMG_PATH = os.path.join(BASE_DIR, "cloud.png")

@@ -37,17 +37,17 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,kivymd,pillow,zlib,random,os
+requirements = python3,kivy,kivymd,pillow,zlib,random
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/assets/cloud.png
+presplash.filename = %(source.dir)s/cloud.png
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/assets/logo.png
+icon.filename = %(source.dir)s/logo.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
@@ -95,7 +95,7 @@ fullscreen = 1
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-android.permissions = INTERNET, WRITE_INTERNAL_STORAGE
+android.permissions = INTERNET, WRITE_INTERNAL_STORAGE, READ_INTERNAL_STORAGE
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
