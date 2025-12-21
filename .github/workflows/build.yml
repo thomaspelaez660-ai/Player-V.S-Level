@@ -1,4 +1,4 @@
-name: Android CI Build
+name: Build APK
 
 on:
   push:
@@ -6,35 +6,35 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  android:
     runs-on: ubuntu-latest
 
     env:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
-      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:${{ github.workspace }}/android-sdk/build-tools/31.0.0:$PATH
+      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:${{ github.workspace }}/android-sdk/build-tools/31.0.0:${{ env.PATH }}
 
     steps:
       # 1️⃣ Checkout repository
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2️⃣ Install system dependencies (including tar!)
-      - name: Install system dependencies
+      # 2️⃣ Install system dependencies (including coreutils, tar, etc.)
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            tar unzip zip wget git coreutils openjdk-11-jdk \
             python3 python3-pip python3-setuptools python3-wheel \
+            git wget unzip zip tar openjdk-11-jdk \
             libncurses6 libncurses5-dev libffi-dev libssl-dev
 
-      # 3️⃣ Install Buildozer and Cython
+      # 3️⃣ Install Buildozer & Cython
       - name: Install Buildozer
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install --upgrade cython==0.29.36 buildozer
+          pip install --upgrade pip
+          pip install cython==0.29.36 buildozer
 
-      # 4️⃣ Install Android SDK command-line tools, platforms, and build-tools
-      - name: Install Android SDK
+      # 4️⃣ Setup Android SDK
+      - name: Setup Android SDK + Build-tools
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
           cd $HOME/android-sdk/cmdline-tools
@@ -44,14 +44,17 @@ jobs:
             rm cmdline-tools.zip
             mv cmdline-tools latest
           fi
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
-      # 5️⃣ Optional: sanity check
-      - name: Verify environment
+          # Accept licenses
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
+
+          # Install platform-tools, build-tools, and API platform
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+            "platform-tools" "platforms;android-33" "build-tools;31.0.0"
+
+      # 5️⃣ Optional sanity check
+      - name: Verify tools
         run: |
-          which tar
-          tar --version
           which git
           git --version
           which python3
@@ -64,10 +67,10 @@ jobs:
       - name: Build APK
         run: buildozer android debug
         env:
-          PATH: $HOME/.local/bin:$PATH
           ANDROID_HOME: $HOME/android-sdk
+          PATH: $HOME/.local/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/31.0.0:$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
 
-      # 7️⃣ Upload APK artifact
+      # 7️⃣ Upload APK
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
