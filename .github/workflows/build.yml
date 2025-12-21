@@ -10,10 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ANDROID_HOME: $HOME/android-sdk
+      ANDROID_HOME: ${{ github.workspace }}/android-sdk
+      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
 
     steps:
-      # 1️⃣ Checkout repository
+      # 1️⃣ Checkout the repository
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -36,8 +37,8 @@ jobs:
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 5️⃣ Install Android SDK cmdline-tools, platform-tools, build-tools, platforms
-      - name: Install Android SDK
+      # 5️⃣ Install Android SDK cmdline-tools, build-tools, and platforms
+      - name: Set up Android SDK
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
           cd $HOME/android-sdk/cmdline-tools
@@ -51,6 +52,7 @@ jobs:
           $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
             "platform-tools" "platforms;android-31" "build-tools;31.0.0"
         env:
+          ANDROID_HOME: $HOME/android-sdk
           PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$PATH
 
       # 6️⃣ Add Android SDK to PATH
