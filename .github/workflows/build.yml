@@ -7,13 +7,13 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # ensures core tools are available
 
     env:
       ANDROID_HOME: $HOME/android-sdk
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -31,14 +31,13 @@ jobs:
           path: .buildozer
           key: buildozer-build-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
-      # 4️⃣ Install system dependencies
+      # 4️⃣ Install system dependencies and core utilities
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git \
+            coreutils git wget unzip zip openjdk-11-jdk \
             python3-pip python3-setuptools python3-wheel \
-            zip unzip openjdk-11-jdk wget \
             libncurses6 libncurses5-dev libffi-dev libssl-dev
 
       # 5️⃣ Install Buildozer
@@ -51,7 +50,7 @@ jobs:
       - name: Add pip binaries to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 7️⃣ Install Android SDK build-tools & platforms
+      # 7️⃣ Install Android SDK build-tools and platforms
       - name: Install Android SDK build-tools and platforms
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
@@ -70,8 +69,11 @@ jobs:
       # 8️⃣ Optional sanity check
       - name: Verify tools
         run: |
+          which git
           git --version
+          which python3
           python3 --version
+          which buildozer
           buildozer --version
           $HOME/android-sdk/build-tools/31.0.0/aidl --version || echo "Aidl ready"
 
