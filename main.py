@@ -1,4 +1,4 @@
-#LevelApp.py
+#Player_VS_Level.py
 #Imports
 from kivy.app import App
 from kivy.uix.widget import Widget
@@ -13,6 +13,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.graphics import Rectangle, Color, InstructionGroup, Ellipse, Triangle, Line
 from kivy.properties import StringProperty, NumericProperty
+from kivy.utils import platform
 from kivy.animation import Animation
 from kivy.uix.image import Image
 from kivy.core.audio import SoundLoader
@@ -22,12 +23,6 @@ from kivy.clock import Clock
 from plyer import orientation
 import random
 import os
-
-try:
-    import android
-    android.permissions.request_permission([android.permissions.READ_INTERNAL_STORAGE])
-except (ImportError, AttributeError):
-    print("File not Found")
 
 levels = [
 # Levels 1-50
@@ -123,7 +118,7 @@ class GameMenu(Screen):
     def start_game(self, instance):
         game_screen = self.manager.get_screen("game")
         
-        mechanics = game_screen.children[0]
+        mechanics = self.mechanics
         mechanics.restart()
         mechanics.player_speed = 5
         mechanics.enemy_speed = 2
@@ -156,7 +151,7 @@ class GameMenu(Screen):
         
     def set_difficulty(self, level):
         game_screen = self.manager.get_screen("game")
-        mechanics = game_screen.children[0]
+        mechanics = self.mechanics
         
         print(f"Difficulty Set To: {level}")
         if level == "Noob":
@@ -176,7 +171,7 @@ class GameMenu(Screen):
     def reset_progress(self, instance):
         print("Progress Reset")
         game_screen = self.manager.get_screen("game")
-        mechanics = game_screen.children[0]
+        mechanics = self.mechanics
         mechanics.restart()
         for enemy in mechanics.enemies:
             mechanics.current_enemy_speed = 3
@@ -217,11 +212,13 @@ class Mechanics(Widget):
         self.enemies = []
         self.hitbox_group = None
         self.boost = None
+        self.regeneration = None
         self.level_index = 0
         self.level_counter = 1
         self.yellow_collected = 0
-        Window.bind(on_key_down=self.on_key_down)
-        Window.bind(on_key_up=self.on_key_up)
+        if platform != "android":
+            Window.bind(on_key_down=self.on_key_down)
+            Window.bind(on_key_up=self.on_key_up)
         self.keys = set()
         self.yellow = None
         self.paused = False
@@ -259,17 +256,17 @@ class Mechanics(Widget):
             self.add_widget(self.bg)
 
         # UI buttons
-        self.btn = Button(text="Forward", font_size=40, pos=(300, 40), size=(200, 100), size_hint=(None, None))
+        self.btn = Button(text="Forward", font_size=40, pos=(300, 40), size=(200, 100), size_hint=(None, None), color=(0, 1, 0, 1))
         self.btn.bind(on_press=self.set_walking)
         self.btn.bind(on_release=self.stop_walking)
         self.add_widget(self.btn)
 
-        self.btn2 = Button(text="Back", font_size=40, pos=(10, 40), size=(200, 100), size_hint=(None, None))
+        self.btn2 = Button(text="Back", font_size=40, pos=(10, 40), size=(200, 100), size_hint=(None, None), color=(0, 1, 0, 1))
         self.btn2.bind(on_press=self.set_back)
         self.btn2.bind(on_release=self.stop_back)
         self.add_widget(self.btn2)
 
-        self.jump = Button(text="Jump", font_size=40, pos=(1200, 40), size=(200, 100), size_hint=(None, None))
+        self.jump = Button(text="Jump", font_size=40, pos=(1200, 40), size=(200, 100), size_hint=(None, None), color=(0, 1, 0, 1))
         self.jump.bind(on_press=self.jumping)
         self.add_widget(self.jump)
 
@@ -376,7 +373,7 @@ class Mechanics(Widget):
             self.green_triangle = None
             
         if random.randint(1, 1000) == 1:
-            self.add_widget(InvisibleSquare(pos=(random.randint(0, Window.width-100), random.randint(0, Window.height-100))))
+            self.add_widget(GhostSquare(pos=(random.randint(0, Window.width-100), random.randint(0, Window.height-100))))
             
         if random.randint(1, 10000) == 1:
             self.add_widget(RainbowSquare(pos=(random.randint(0, Window.width-100), random.randint(0, Window.height-100))))
@@ -1090,7 +1087,7 @@ class Boss(Widget):
             b.disabled = True
         Clock.unschedule(self.update)
         
-class InvisibleSquare(Widget):
+class GhostSquare(Widget):
     def __init__(self, pos=(0, 0), **kwargs):
         super().__init__(**kwargs)
         self.size = (100, 100)
@@ -1157,14 +1154,20 @@ class AngrySquare(Widget):
 # -----------------------------------------
 class LevelApp(App):
     def build(self):
-        #Screen Manager
+        #ScreenManager
         sm = ScreenManager()
-        #adding menu
-        sm.add_widget(GameMenu(name="menu"))
-        #Game
-        game_screen = GameScreen(name="game")
-        game_screen.add_widget(Mechanics())
-        sm.add_widget(game_screen)
+        
+        #Game Things
+        menu = GameMenu(name="menu")
+        game = GameScreen(name="game")
+        
+        mechanics = Mechanics()
+        game.add_widget(mechanics)
+        
+        sm.add_widget(menu)
+        sm.add_widget(game)
+        
+        menu.mechanics = mechanics
         
         return sm
 

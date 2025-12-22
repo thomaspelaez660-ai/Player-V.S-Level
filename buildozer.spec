@@ -16,7 +16,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,wav,mp3
 
 # (list) List of inclusions using pattern matching
-source.include_patterns = assets/*,images/*.png, sounds/*.mp3, sounds/*.wav
+#source.include_patterns = assets/*,images/*.png, sounds/*.mp3, sounds/*.wav
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -37,14 +37,14 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,kivymd,pillow,zlib,random
+requirements = python3,kivy,plyer,pillow
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/cloud.png
+presplash.filename = %(source.dir)s/intro.png
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/logo.png
@@ -95,7 +95,7 @@ fullscreen = 1
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-android.permissions = INTERNET, WRITE_INTERNAL_STORAGE, READ_INTERNAL_STORAGE
+android.permissions = INTERNET
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
@@ -107,7 +107,7 @@ android.api = 33
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 25b
+#android.ndk = 25b
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
 android.ndk_api = 21
@@ -119,7 +119,7 @@ android.ndk_api = 21
 #android.ndk_path =
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-android.sdk_path = 
+#android.sdk_path = 
 
 # (str) ANT directory (if empty, it will be automatically downloaded.)
 #android.ant_path =
