@@ -28,7 +28,7 @@ jobs:
         pip3 install --upgrade pip
         pip3 install cython buildozer
 
-    - name: Setup Android SDK (FIX cmdline-tools error)
+    - name: Setup Android SDK (FIX cmdline-tools + AIDL)
       run: |
         export ANDROID_HOME=$HOME/android-sdk
         export ANDROID_SDK_ROOT=$ANDROID_HOME
@@ -43,12 +43,18 @@ jobs:
         mv cmdline-tools latest
 
         yes | latest/bin/sdkmanager --licenses
-        latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+        latest/bin/sdkmanager \
+          "platform-tools" \
+          "platforms;android-33" \
+          "build-tools;33.0.2" \
+          "cmdline-tools;latest"
 
     - name: Build APK
       run: |
         export ANDROID_HOME=$HOME/android-sdk
         export ANDROID_SDK_ROOT=$ANDROID_HOME
+        export PATH=$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/platform-tools:$PATH
         buildozer android debug
 
     - name: Upload APK
