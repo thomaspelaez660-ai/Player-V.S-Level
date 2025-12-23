@@ -154,9 +154,7 @@ class GameMenu(Screen):
         mechanics = self.mechanics
         
         print(f"Difficulty Set To: {level}")
-        if level == "Noob":
-            mechanics.current_enemy_speed = 0
-        elif level == "Easy":
+        if level == "Easy":
             mechanics.current_enemy_speed = 3
         elif level == "Normal":
             mechanics.current_enemy_speed = 4
@@ -378,8 +376,8 @@ class Mechanics(Widget):
         if random.randint(1, 10000) == 1:
             self.add_widget(RainbowSquare(pos=(random.randint(0, Window.width-100), random.randint(0, Window.height-100))))
             
-        if random.randint(1, 1000) == 1:
-            self.add_widget(AngrySquare(pos=(random.randint(0, Window.width-100), random.randint(0, Window.height-100))))
+        if random.randint(1, 2) == 1:
+            self.add_widget(RedSquare(pos=(random.randint(0, Window.width-100), random.randint(0, Window.height-100))))
 
     # -----------------------------------------
     # Check yellow collection
@@ -1112,11 +1110,12 @@ class RainbowSquare(Widget):
         self.color.g = random.random()
         self.color.b = random.random()
         
-class AngrySquare(Widget):
+class RedSquare(Widget):
     def __init__(self, pos=(0, 0), **kwargs):
         super().__init__(**kwargs)
         self.size = (100, 100)
         self.pos = pos
+        mechanics = Mechanics()
         with self.canvas:
             Color(1, 0, 0, 1)
             self.rect = Rectangle(pos=self.pos, size=self.size)
@@ -1124,7 +1123,8 @@ class AngrySquare(Widget):
         Clock.schedule_interval(self.chase_player, 1/30)
         
     def chase_player(self, dt):
-        if hasattr(mechanics, "pos_x") and hasattr(mechanics, "pos_y"):
+        global mechanics
+        if hasattr(Mechanics, "pos_x") and hasattr(Mechanics, "pos_y"):
             mechanics = self.parent
             if not mechanics:
                 return
